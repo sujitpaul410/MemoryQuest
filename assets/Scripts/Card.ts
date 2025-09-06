@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Component, Animation, Input, EventTouch } from 'cc';
+import { _decorator, CCInteger, Component, Animation, Input, EventTouch, tween, Vec3 } from 'cc';
 import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
@@ -57,6 +57,21 @@ export class Card extends Component {
         this.scheduleOnce(function(){
             this.node.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
         }, 0.19);
+    }
+
+    public vansihCard(): void
+    {
+        this.node.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
+
+        tween(this.node)
+            .to(1.0, {
+                scale: new Vec3(0, 0, 0),
+                eulerAngles: new Vec3(0, 0, 360)
+            })
+            .call(() => {
+                this.node.active = false;
+            })
+            .start();
     }
 }
 

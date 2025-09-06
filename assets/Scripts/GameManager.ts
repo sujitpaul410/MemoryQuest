@@ -27,6 +27,8 @@ export class GameManager extends Component {
 
     private instantiatedCards: Node[] = [];
 
+    private selectedCards: Node[] = [];
+
     protected start(): void
     {
         this.initGame();
@@ -95,7 +97,37 @@ export class GameManager extends Component {
 
     private onCardRevealed(selectedCard: Node)
     {
-        console.log("Selected Card Type: "+selectedCard.getComponent(Card).getType());
+        // console.log("Selected Card Type: "+selectedCard.getComponent(Card).getType());
+
+        this.selectedCards.push(selectedCard);
+        if(this.selectedCards.length >= 2)
+        {
+            this.checkForMatch();
+        }
+    }
+
+    private checkForMatch(): void
+    {
+        let _len = this.selectedCards.length;
+
+        if(this.selectedCards[_len-1].getComponent(Card).getType() == this.selectedCards[_len-2].getComponent(Card).getType())
+        {
+            // console.log("Match");
+            this.selectedCards[_len-1].getComponent(Card).vansihCard();
+            this.selectedCards[_len-2].getComponent(Card).vansihCard();
+        }
+        else
+        {
+            let _card1 = this.selectedCards[_len-1];
+            let _card2 = this.selectedCards[_len-2];
+            this.scheduleOnce(function(){
+                _card1.getComponent(Card).hideCard();
+                _card2.getComponent(Card).hideCard();
+            }, 0.4);
+        }
+
+        this.selectedCards.pop();
+        this.selectedCards.pop();
     }
 
 

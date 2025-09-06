@@ -1,4 +1,5 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Layout, Node } from 'cc';
+import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIManager')
@@ -13,6 +14,16 @@ export class UIManager extends Component {
         cards.forEach(card => {
             card.setParent(this.gridContainer);
         });   
+    }
+
+    protected start(): void
+    {
+        EventsManager.event.on("GameStarted", this.onGameStarted, this);
+    }
+
+    private onGameStarted(): void
+    {
+        this.gridContainer.getComponent(Layout).enabled = false;
     }
 }
 
