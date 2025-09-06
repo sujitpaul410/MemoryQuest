@@ -1,4 +1,4 @@
-import { _decorator, Component, director, instantiate, Layout, Node, Prefab, Size, UITransform, Vec2 } from 'cc';
+import { _decorator, Component, director, instantiate, Layout, Node, Prefab, Size, sys, UITransform, Vec2 } from 'cc';
 import { Card } from './Card';
 import { UIManager } from './UIManager';
 import { EventsManager } from './EventsManager';
@@ -32,12 +32,35 @@ export class GameManager extends Component {
 
     private matchedCards: number = 0;
 
+    private isLoadingSavedGame: boolean = false;
+
+    private savedData: any = null;
+
+    private loadGameMatchedItems: Node[] = [];
+
     protected onLoad(): void
     {
         let _gameSettingsManager = director.getScene().getChildByName("GameSettingsManager");
         if(_gameSettingsManager)
         {
-            this.gridSize = _gameSettingsManager.getComponent(GameSettingsManager).getGridDimension();
+            let _gameSettingsManagerComp = _gameSettingsManager.getComponent(GameSettingsManager);
+
+            if(_gameSettingsManagerComp.needsToLoadSavedGame)
+            {
+                let saved = sys.localStorage.getItem("MemoryQuestSave");
+                if (saved)
+                {
+                    this.isLoadingSavedGame = true;
+                    this.savedData = JSON.parse(saved);
+                    // console.log("Loaded save:", saveData);
+                    this.gridSize = this.savedData.gridSize;
+                    this.matchedCards = this.savedData.score;
+                }
+            }
+            else
+            {
+                this.gridSize = _gameSettingsManagerComp.getGridDimension();
+            }
             director.removePersistRootNode(_gameSettingsManager);
         }
     }
@@ -45,8 +68,18 @@ export class GameManager extends Component {
     protected start(): void
     {
         this.initGame();
-        this.shuffleCards();
-        this.uiManager.renderGrid(this.instantiatedCards);
+        if(!this.isLoadingSavedGame)
+        {
+            this.shuffleCards();
+            this.uiManager.renderGrid(this.instantiatedCards);
+        }
+        else
+        {
+            this.uiManager.renderPreLoadedGrid(this.instantiatedCards, this.loadGameMatchedItems);
+            this.uiManager.setPreLoadedScore(this.savedData.score);
+            this.uiManager.setPreLoadedTurns(this.savedData.turns);
+        }
+        this.uiManager.setGridSize(this.gridSize);
         
         this.scheduleOnce(function(){
             EventsManager.event.emit("GameStarted");
@@ -66,21 +99,28 @@ export class GameManager extends Component {
             _totalCards -= 1;
         }
         
-        for(let i=0; i<(_totalCards/2); i++)
+        if(!this.isLoadingSavedGame)
         {
-            let _card1 = instantiate(this.cards[i]);
-            _card1.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
-            _card1.children.forEach(element => {
-                element.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
-            });
-            this.instantiatedCards.push(_card1);
+            for(let i=0; i<(_totalCards/2); i++)
+            {
+                let _card1 = instantiate(this.cards[i]);
+                    _card1.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+                    _card1.children.forEach(element => {
+                    element.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+                });
+                this.instantiatedCards.push(_card1);
 
-            let _card2 = instantiate(this.cards[i]);
-            _card2.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
-            _card2.children.forEach(element => {
-                element.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
-            });
-            this.instantiatedCards.push(_card2);
+                let _card2 = instantiate(this.cards[i]);
+                _card2.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+                _card2.children.forEach(element => {
+                    element.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+                });
+                this.instantiatedCards.push(_card2);
+            }
+        }
+        else
+        {
+            this.instantiateCardsFromSavedData();
         }
 
         let _colDif = maxColSize - this.gridSize.y;
@@ -149,11 +189,38 @@ export class GameManager extends Component {
         this.selectedCards.pop();
         this.selectedCards.pop();
 
-        if(this.matchedCards >= this.instantiatedCards.length - 1)
+        // console.log("matched cards: "+this.matchedCards+" instantiated cards: "+(this.instantiatedCards.length));
+        if(this.matchedCards >= this.instantiatedCards.length)
         {
             EventsManager.event.emit("IncrTurns");
             EventsManager.event.emit("GameOver", this.gridSize);
         }
+    }
+
+    private instantiateCardsFromSavedData(): void
+    {
+
+        this.savedData.grid.forEach((item: { name: string; isActive: boolean }) => {
+            
+            // console.log(item.name, ":", item.isActive);
+
+            let _num = parseInt(item.name.split("_")[1]);
+
+            let _card1 = instantiate(this.cards[_num-1]);
+            _card1.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+            _card1.children.forEach(element => {
+                element.getComponent(UITransform).contentSize = new Size(elementXSize, elementYSize);
+            });
+            
+            this.instantiatedCards.push(_card1);
+
+            if(!item.isActive)
+            {
+                // console.log(item.name);
+                this.loadGameMatchedItems.push(_card1);
+            }
+        });
+
     }
 
 

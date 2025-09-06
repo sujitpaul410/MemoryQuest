@@ -1,4 +1,4 @@
-import { _decorator, Component, director, Button, Vec2 } from 'cc';
+import { _decorator, Component, director, Button, Vec2, sys, Node } from 'cc';
 import { DropDown } from './DropDown';
 import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
@@ -19,9 +19,29 @@ export class GameSettingsManager extends Component {
 
     private numCols: number = 2;
 
+    public savedGame: string = null;
+
+    @property(Node)
+    private loadGameBtnNode: Node = null;
+
+    public needsToLoadSavedGame: boolean = false;
+
     protected onLoad(): void
     {
         director.addPersistRootNode(this.node);
+    }
+
+    protected start(): void
+    {
+        this.savedGame = sys.localStorage.getItem("MemoryQuestSave");
+        if (!this.savedGame)
+        {
+            return;
+        }
+        else
+        {
+            this.loadGameBtnNode.active = true;
+        }
     }
 
     private startGameBtnClick(): void
@@ -31,6 +51,7 @@ export class GameSettingsManager extends Component {
         this.startBtn.interactable = false;
         this.rowsDropDown.node.children[0].getComponent(Button).interactable = false;
         this.columnsDropDown.node.children[0].getComponent(Button).interactable = false;
+        this.loadGameBtnNode.getComponent(Button).interactable=false;
 
         this.numRows = this.rowsDropDown.getCurrVal();
         this.numCols = this.columnsDropDown.getCurrVal();
@@ -41,6 +62,12 @@ export class GameSettingsManager extends Component {
     public getGridDimension(): Vec2
     {
         return new Vec2(this.numRows, this.numCols);
+    }
+
+    private loadGameBtnClick(): void
+    {
+        this.needsToLoadSavedGame = true;
+        this.startGameBtnClick();
     }
 }
 
