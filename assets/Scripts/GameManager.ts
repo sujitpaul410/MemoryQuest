@@ -34,8 +34,12 @@ export class GameManager extends Component {
 
     protected onLoad(): void
     {
-        let _gameSettingsManager = director.getScene().getChildByName("GameSettingsManager").getComponent(GameSettingsManager);
-        this.gridSize = _gameSettingsManager.getGridDimension();
+        let _gameSettingsManager = director.getScene().getChildByName("GameSettingsManager");
+        if(_gameSettingsManager)
+        {
+            this.gridSize = _gameSettingsManager.getComponent(GameSettingsManager).getGridDimension();
+            director.removePersistRootNode(_gameSettingsManager);
+        }
     }
 
     protected start(): void

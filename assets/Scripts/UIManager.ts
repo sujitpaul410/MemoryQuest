@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Layout, Node, Vec2, Animation } from 'cc';
+import { _decorator, Component, Label, Layout, Node, Vec2, Animation, director, Button } from 'cc';
 import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
@@ -25,6 +25,9 @@ export class UIManager extends Component {
 
     @property(Node)
     private turnTxt: Node = null;
+
+    @property(Button)
+    private homeBtn: Button = null;
 
 
     public renderGrid(cards: Node[]): void
@@ -79,7 +82,15 @@ export class UIManager extends Component {
         this.summaryTxt.string = "You've completed this "+gridSize.x+" x "+gridSize.y+" board in "+this.turnsValTxt.string+" turns.";
         this.gameOverTxt.active=true;
         this.summaryTxt.node.active=true;
+
+        this.homeBtn.node.setPosition(0, -194);
         
+    }
+
+    private onHomeBtnClick(): void
+    {
+        this.homeBtn.interactable = false;
+        director.loadScene("mainMenuScene");
     }
 }
 
