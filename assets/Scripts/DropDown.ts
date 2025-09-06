@@ -1,4 +1,5 @@
 import { _decorator, Button, Component, Label, Node } from 'cc';
+import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('DropDown')
@@ -40,6 +41,8 @@ export class DropDown extends Component {
 
             this.primaryBtnLabel.string = "        "+this.currVal+"      "+"▲";
         }
+
+        EventsManager.event.emit("Tap");
     }
 
     private onSecondaryBtnClick(event: Event, customEventData: string): void
@@ -50,6 +53,8 @@ export class DropDown extends Component {
         this.isListNodeActive = false;
 
         this.primaryBtnLabel.string = "        "+this.currVal+"      "+"▲";
+        
+        EventsManager.event.emit("Tap");
 
     }
 

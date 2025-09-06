@@ -1,5 +1,6 @@
 import { _decorator, Component, director, Button, Vec2 } from 'cc';
 import { DropDown } from './DropDown';
+import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameSettingsManager')
@@ -25,7 +26,11 @@ export class GameSettingsManager extends Component {
 
     private startGameBtnClick(): void
     {
+        EventsManager.event.emit("Tap");
+
         this.startBtn.interactable = false;
+        this.rowsDropDown.node.children[0].getComponent(Button).interactable = false;
+        this.columnsDropDown.node.children[0].getComponent(Button).interactable = false;
 
         this.numRows = this.rowsDropDown.getCurrVal();
         this.numCols = this.columnsDropDown.getCurrVal();

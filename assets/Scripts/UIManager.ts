@@ -89,6 +89,7 @@ export class UIManager extends Component {
 
     private onHomeBtnClick(): void
     {
+        EventsManager.event.emit("Tap");
         this.homeBtn.interactable = false;
         director.loadScene("mainMenuScene");
     }

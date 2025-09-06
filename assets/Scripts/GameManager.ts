@@ -143,6 +143,7 @@ export class GameManager extends Component {
                 _card1.getComponent(Card).hideCard();
                 _card2.getComponent(Card).hideCard();
             }, 0.4);
+            EventsManager.event.emit("NoMatch");
         }
 
         this.selectedCards.pop();
