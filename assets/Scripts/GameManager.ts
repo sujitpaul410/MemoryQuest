@@ -31,7 +31,11 @@ export class GameManager extends Component {
     {
         this.initGame();
         this.shuffleCards();
-        this.uiManager.renderGrid(this.instantiatedCards);    
+        this.uiManager.renderGrid(this.instantiatedCards);
+        
+        this.scheduleOnce(function(){
+            this.hideAllCards();
+        }, 4);
     }
 
     private initGame(): void
@@ -85,6 +89,13 @@ export class GameManager extends Component {
             [this.instantiatedCards[i], this.instantiatedCards[j]] = [this.instantiatedCards[j], this.instantiatedCards[i]];
         }
 
+    }
+
+    private hideAllCards(): void
+    {
+        this.instantiatedCards.forEach(card => {
+            card.getComponent(Card).hideCard();
+        });
     }
 
 
