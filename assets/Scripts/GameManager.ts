@@ -1,7 +1,8 @@
-import { _decorator, Component, instantiate, Layout, Node, Prefab, Size, UITransform, Vec2 } from 'cc';
+import { _decorator, Component, director, instantiate, Layout, Node, Prefab, Size, UITransform, Vec2 } from 'cc';
 import { Card } from './Card';
 import { UIManager } from './UIManager';
 import { EventsManager } from './EventsManager';
+import { GameSettingsManager } from './GameSettingsManager';
 const { ccclass, property } = _decorator;
 
 const elementXSize: number = 128.5;
@@ -30,6 +31,12 @@ export class GameManager extends Component {
     private selectedCards: Node[] = [];
 
     private matchedCards: number = 0;
+
+    protected onLoad(): void
+    {
+        let _gameSettingsManager = director.getScene().getChildByName("GameSettingsManager").getComponent(GameSettingsManager);
+        this.gridSize = _gameSettingsManager.getGridDimension();
+    }
 
     protected start(): void
     {
@@ -139,6 +146,7 @@ export class GameManager extends Component {
 
         if(this.matchedCards >= this.instantiatedCards.length - 1)
         {
+            EventsManager.event.emit("IncrTurns");
             EventsManager.event.emit("GameOver", this.gridSize);
         }
     }
