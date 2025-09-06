@@ -29,6 +29,8 @@ export class GameManager extends Component {
 
     private selectedCards: Node[] = [];
 
+    private matchedCards: number = 0;
+
     protected start(): void
     {
         this.initGame();
@@ -104,6 +106,8 @@ export class GameManager extends Component {
         {
             this.checkForMatch();
         }
+        
+        EventsManager.event.emit("IncrTurns");
     }
 
     private checkForMatch(): void
@@ -115,6 +119,10 @@ export class GameManager extends Component {
             // console.log("Match");
             this.selectedCards[_len-1].getComponent(Card).vansihCard();
             this.selectedCards[_len-2].getComponent(Card).vansihCard();
+
+            EventsManager.event.emit("IncrScore");
+
+            this.matchedCards += 2;
         }
         else
         {
@@ -128,6 +136,11 @@ export class GameManager extends Component {
 
         this.selectedCards.pop();
         this.selectedCards.pop();
+
+        if(this.matchedCards >= this.instantiatedCards.length - 1)
+        {
+            EventsManager.event.emit("GameOver", this.gridSize);
+        }
     }
 
 
