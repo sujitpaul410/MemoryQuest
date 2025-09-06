@@ -1,6 +1,7 @@
 import { _decorator, Component, instantiate, Layout, Node, Prefab, Size, UITransform, Vec2 } from 'cc';
 import { Card } from './Card';
 import { UIManager } from './UIManager';
+import { EventsManager } from './EventsManager';
 const { ccclass, property } = _decorator;
 
 const elementXSize: number = 128.5;
@@ -26,7 +27,6 @@ export class GameManager extends Component {
 
     private instantiatedCards: Node[] = [];
 
-
     protected start(): void
     {
         this.initGame();
@@ -34,8 +34,10 @@ export class GameManager extends Component {
         this.uiManager.renderGrid(this.instantiatedCards);
         
         this.scheduleOnce(function(){
-            this.hideAllCards();
+            EventsManager.event.emit("GameStarted");
         }, 4);
+
+        EventsManager.event.on("CardSelected", this.onCardRevealed, this);
     }
 
     private initGame(): void
@@ -91,11 +93,9 @@ export class GameManager extends Component {
 
     }
 
-    private hideAllCards(): void
+    private onCardRevealed(selectedCard: Node)
     {
-        this.instantiatedCards.forEach(card => {
-            card.getComponent(Card).hideCard();
-        });
+        console.log("Selected Card Type: "+selectedCard.getComponent(Card).getType());
     }
 
 
